@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        #map {
+            width: 1330px;
+            height: 620px;
+        }
+        </style>
+        <title>Parcelas disponibles en el Banco de Tierras del Bierzo</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.wms.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="data/Muni_Bierzo_1.js"></script>
+        <script src="data/texturas_BdT_2.js"></script>
+        <script src="data/Parcelas_BdT_5.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        })
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>');
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+        }
+        var layer_Ortoimagen_0 = L.WMS.layer("http://www.ign.es/wms-inspire/pnoa-ma", "OI.OrthoimageCoverage", {
+            format: 'image/png',
+            uppercase: true,
+            transparent: true,
+            continuousWorld : true,
+            tiled: true,
+            info_format: 'text/html',
+            opacity: 1,
+            identify: false,
+            attribution: '',
+        });
+        map.addLayer(layer_Ortoimagen_0);
+        function pop_Muni_Bierzo_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NOMBRE'] !== null ? Autolinker.link(String(feature.properties['NOMBRE'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Superficie (ha)</th>\
+                        <td>' + (feature.properties['HECTARES'] !== null ? Autolinker.link(String(feature.properties['HECTARES'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Cod_Catastro_muni</th>\
+                        <td>' + (feature.properties['C_MUNI_ID'] !== null ? Autolinker.link(String(feature.properties['C_MUNI_ID'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Muni_Bierzo_1_0() {
+            return {
+                pane: 'pane_Muni_Bierzo_1',
+                opacity: 1,
+                color: 'rgba(56,128,54,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(77,175,74,1.0)',
+            }
+        }
+        map.createPane('pane_Muni_Bierzo_1');
+        map.getPane('pane_Muni_Bierzo_1').style.zIndex = 401;
+        map.getPane('pane_Muni_Bierzo_1').style['mix-blend-mode'] = 'normal';
+        var layer_Muni_Bierzo_1 = new L.geoJson(json_Muni_Bierzo_1, {
+            attribution: '',
+            pane: 'pane_Muni_Bierzo_1',
+            onEachFeature: pop_Muni_Bierzo_1,
+            style: style_Muni_Bierzo_1_0,
+        });
+        bounds_group.addLayer(layer_Muni_Bierzo_1);
+        function pop_texturas_BdT_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Textura</th>\
+                        <td>' + (feature.properties['D_TEXTURA'] !== null ? Autolinker.link(String(feature.properties['D_TEXTURA'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_texturas_BdT_2_0(feature) {
+            switch(String(feature.properties['D_TEXTURA'])) {
+                case 'Aluvial-Terrazas':
+                    return {
+                pane: 'pane_texturas_BdT_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+            }
+                    break;
+                case 'Franco':
+                    return {
+                pane: 'pane_texturas_BdT_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(241,124,74,1.0)',
+            }
+                    break;
+                case 'Franco arcillo limoso':
+                    return {
+                pane: 'pane_texturas_BdT_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,201,128,1.0)',
+            }
+                    break;
+                case 'Franco arcilloso':
+                    return {
+                pane: 'pane_texturas_BdT_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,191,1.0)',
+            }
+                    break;
+                case 'Franco arenoso':
+                    return {
+                pane: 'pane_texturas_BdT_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(199,233,173,1.0)',
+            }
+                    break;
+                case 'Franco limoso':
+                    return {
+                pane: 'pane_texturas_BdT_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(128,191,172,1.0)',
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_texturas_BdT_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(43,131,186,1.0)',
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_texturas_BdT_2');
+        map.getPane('pane_texturas_BdT_2').style.zIndex = 402;
+        map.getPane('pane_texturas_BdT_2').style['mix-blend-mode'] = 'normal';
+        var layer_texturas_BdT_2 = new L.geoJson(json_texturas_BdT_2, {
+            attribution: '',
+            pane: 'pane_texturas_BdT_2',
+            onEachFeature: pop_texturas_BdT_2,
+            style: style_texturas_BdT_2_0,
+        });
+        bounds_group.addLayer(layer_texturas_BdT_2);
+        var img_pH_Suelos_Bierzo_500m_3 = 'data/pH_Suelos_Bierzo_500m_3.png';
+        var img_bounds_pH_Suelos_Bierzo_500m_3 = [[42.28536256576233,-7.099140444108124],[42.94489177225412,-6.095453814901937]];
+        var layer_pH_Suelos_Bierzo_500m_3 = new L.imageOverlay(img_pH_Suelos_Bierzo_500m_3, img_bounds_pH_Suelos_Bierzo_500m_3);
+        bounds_group.addLayer(layer_pH_Suelos_Bierzo_500m_3);
+        var img_MO_Bierzo_4 = 'data/MO_Bierzo_4.png';
+        var img_bounds_MO_Bierzo_4 = [[42.28536256576233,-7.099140444108124],[42.94489177225412,-6.095453814901937]];
+        var layer_MO_Bierzo_4 = new L.imageOverlay(img_MO_Bierzo_4, img_bounds_MO_Bierzo_4);
+        bounds_group.addLayer(layer_MO_Bierzo_4);
+        function pop_Parcelas_BdT_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Poligono</th>\
+                        <td>' + (feature.properties['masa'] !== null ? Autolinker.link(String(feature.properties['masa'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Parcela</th>\
+                        <td>' + (feature.properties['parcela'] !== null ? Autolinker.link(String(feature.properties['parcela'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Area (m2)</th>\
+                        <td>' + (feature.properties['area'] !== null ? Autolinker.link(String(feature.properties['area'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">refcat</th>\
+                        <td>' + (feature.properties['refcat'] !== null ? Autolinker.link(String(feature.properties['refcat'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Paraje</th>\
+                        <td>' + (feature.properties['paraje'] !== null ? Autolinker.link(String(feature.properties['paraje'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Municipio</th>\
+                        <td>' + (feature.properties['municipios'] !== null ? Autolinker.link(String(feature.properties['municipios'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Riego</th>\
+                        <td>' + (feature.properties['riego'] !== null ? Autolinker.link(String(feature.properties['riego'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Uso</th>\
+                        <td>' + (feature.properties['uso'] !== null ? Autolinker.link(String(feature.properties['uso'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['webcatastr'] !== null ? Autolinker.link(String(feature.properties['webcatastr'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Parcelas_BdT_5_0(feature) {
+            switch(String(feature.properties['uso'])) {
+                case 'apicultura':
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+            }
+                    break;
+                case 'castaño':
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(231,84,55,1.0)',
+            }
+                    break;
+                case 'cereal regadío':
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(246,144,83,1.0)',
+            }
+                    break;
+                case 'cereal secano':
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,190,116,1.0)',
+            }
+                    break;
+                case 'forestal':
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,223,154,1.0)',
+            }
+                    break;
+                case 'frutales':
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,191,1.0)',
+            }
+                    break;
+                case 'ganadero':
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(222,242,180,1.0)',
+            }
+                    break;
+                case 'hortícola':
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(188,228,170,1.0)',
+            }
+                    break;
+                case 'otro':
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(145,203,169,1.0)',
+            }
+                    break;
+                case 'viñedo':
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(94,167,177,1.0)',
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_Parcelas_BdT_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(43,131,186,1.0)',
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_Parcelas_BdT_5');
+        map.getPane('pane_Parcelas_BdT_5').style.zIndex = 405;
+        map.getPane('pane_Parcelas_BdT_5').style['mix-blend-mode'] = 'normal';
+        var layer_Parcelas_BdT_5 = new L.geoJson(json_Parcelas_BdT_5, {
+            attribution: '',
+            pane: 'pane_Parcelas_BdT_5',
+            onEachFeature: pop_Parcelas_BdT_5,
+            style: style_Parcelas_BdT_5_0,
+        });
+        bounds_group.addLayer(layer_Parcelas_BdT_5);
+        map.addLayer(layer_Parcelas_BdT_5);
+        var title = new L.Control();
+        title.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+        title.update = function () {
+            this._div.innerHTML = '<h2>Parcelas disponibles en el Banco de Tierras del Bierzo</h2>';
+        };
+        title.addTo(map);
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'Parcelas_BdT<br /><table><tr><td style="text-align: right;"><img src="legend/Parcelas_BdT_5_apicultura0.png" /></td><td>apicultura</td></tr><tr><td style="text-align: right;"><img src="legend/Parcelas_BdT_5_castaño1.png" /></td><td>castaño</td></tr><tr><td style="text-align: right;"><img src="legend/Parcelas_BdT_5_cerealregadío2.png" /></td><td>cereal regadío</td></tr><tr><td style="text-align: left;"><img src="legend/Parcelas_BdT_5_cerealsecano3.png" /></td><td>cereal secano</td></tr><tr><td style="text-align: center;"><img src="legend/Parcelas_BdT_5_forestal4.png" /></td><td>forestal</td></tr><tr><td style="text-align: center;"><img src="legend/Parcelas_BdT_5_frutales5.png" /></td><td>frutales</td></tr><tr><td style="text-align: center;"><img src="legend/Parcelas_BdT_5_ganadero6.png" /></td><td>ganadero</td></tr><tr><td style="text-align: center;"><img src="legend/Parcelas_BdT_5_hortícola7.png" /></td><td>hortícola</td></tr><tr><td style="text-align: center;"><img src="legend/Parcelas_BdT_5_otro8.png" /></td><td>otro</td></tr><tr><td style="text-align: center;"><img src="legend/Parcelas_BdT_5_viñedo9.png" /></td><td>viñedo</td></tr><tr><td style="text-align: center;"><img src="legend/Parcelas_BdT_5_10.png" /></td><td></td></tr></table>': layer_Parcelas_BdT_5,"MO_Bierzo": layer_MO_Bierzo_4,"pH_Suelos_Bierzo_500m": layer_pH_Suelos_Bierzo_500m_3,'texturas_BdT<br /><table><tr><td style="text-align: center;"><img src="legend/texturas_BdT_2_AluvialTerrazas0.png" /></td><td>Aluvial-Terrazas</td></tr><tr><td style="text-align: center;"><img src="legend/texturas_BdT_2_Franco1.png" /></td><td>Franco</td></tr><tr><td style="text-align: center;"><img src="legend/texturas_BdT_2_Francoarcillolimoso2.png" /></td><td>Franco arcillo limoso</td></tr><tr><td style="text-align: center;"><img src="legend/texturas_BdT_2_Francoarcilloso3.png" /></td><td>Franco arcilloso</td></tr><tr><td style="text-align: center;"><img src="legend/texturas_BdT_2_Francoarenoso4.png" /></td><td>Franco arenoso</td></tr><tr><td style="text-align: center;"><img src="legend/texturas_BdT_2_Francolimoso5.png" /></td><td>Franco limoso</td></tr><tr><td style="text-align: center;"><img src="legend/texturas_BdT_2_6.png" /></td><td></td></tr></table>': layer_texturas_BdT_2,'<img src="legend/Muni_Bierzo_1.png" /> Muni_Bierzo': layer_Muni_Bierzo_1,"Ortoimagen": layer_Ortoimagen_0,}).addTo(map);
+        setBounds();
+        map.addControl(new L.Control.Search({
+            layer: layer_Parcelas_BdT_5,
+            initial: false,
+            hideMarkerOnCollapse: true,
+			textPlaceholder: 'Municipio',
+			zoom: 16,
+            propertyName: 'municipios'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+		map.addControl(new L.Control.Search({
+            layer: layer_Parcelas_BdT_5,
+            initial: false,
+            hideMarkerOnCollapse: true,
+			textPlaceholder: 'Poligono',
+			zoom: 16,
+            propertyName: 'masa'}));
+        document.getElementsByClassName('search-button')[1].className +=
+         ' fa fa-binoculars';
+        L.ImageOverlay.include({
+            getBounds: function () {
+                return this._bounds;
+            }
+        });
+        </script>
+    </body>
+</html>
